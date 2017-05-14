@@ -19,6 +19,7 @@ func (t Type) String() string {
 	return t.Name
 }
 
+// Encode returns a binary representation of a type
 func (t *Type) Encode() []byte {
 	b, err := msgpack.Marshal(&t)
 	if err != nil {
@@ -26,9 +27,13 @@ func (t *Type) Encode() []byte {
 	}
 	return b
 }
+
+// ID returns the id of a type
 func (t *Type) ID() uint64 {
 	return t.Id
 }
+
+// SetID sets the id of a type
 func (t *Type) SetID(id uint64) {
 	t.Id = id
 }
@@ -45,17 +50,35 @@ func Add(name string) {
 
 // Rm removes a type of part from the list
 func Rm(name string) {
-	for _, e := range List() {
-		if e.Name == name {
-			err := db.Delete(db.TypesBucket, &e)
+	t := ByName(name)
 
-			if err != nil {
-				log.Fatal(err)
-			}
-			return
-		}
+	err := db.Delete(db.TypesBucket, &t)
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
+}
+
+// ByName returns a type by its name
+func ByName(name string) Type {
+	for _, e := range List() {
+		if e.Name == name {
+			return e
+		}
+	}
+	return Type{}
+}
+
+// ByID returns a type by its name
+func ByID(id uint64) Type {
+	b := db.Get(db.TypesBucket, id)
+	t := Type{}
+	err := msgpack.Unmarshal(b, &t)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return t
 }
 
 // List returns a sorted slice of part types

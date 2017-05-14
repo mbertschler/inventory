@@ -2,9 +2,15 @@ package parts
 
 import (
 	"errors"
-	"math/rand"
-	"time"
+	"inventory/db"
+	"inventory/types"
+	"log"
+	"sort"
 	"unicode"
+
+	"fmt"
+
+	msgpack "gopkg.in/vmihailenco/msgpack.v2"
 )
 
 var (
@@ -13,39 +19,121 @@ var (
 	ids map[uint64]interface{}
 )
 
-func newID() uint64 {
-	rand.Seed(time.Now().UnixNano())
-
-	for {
-		id := rand.Uint64()
-		_, ok := ids[id]
-		if !ok {
-			return id
-		}
-	}
-}
-
 // Part describes a part
 type Part struct {
-	ID        uint64
+	Id        uint64
 	Name      string
-	Type      string
+	Type      uint64
 	Value     string
 	Location  string
 	Datasheet string
+	Stock     uint64
 }
 
-type PartsByName []*Part
+func (p Part) String() string {
+	t := types.ByID(p.Type)
+	return fmt.Sprintf(`%s
+	Type:      %s
+	Value:     %s
+	Location:  %s
+	Datasheet: %s
+	Stock:     %d`,
+		p.Name,
+		t.Name,
+		p.Value,
+		p.Location,
+		p.Datasheet,
+		p.Stock,
+	)
+}
 
-func (p PartsByName) Len() int {
-	return len(p)
+// Encode returns a binary representation of a part
+func (t *Part) Encode() []byte {
+	b, err := msgpack.Marshal(&t)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return b
 }
-func (p PartsByName) Swap(i, j int) {
-	p[i], p[j] = p[j], p[i]
+
+// ID returns the id of a part
+func (t *Part) ID() uint64 {
+	return t.Id
 }
-func (p PartsByName) Less(i, j int) bool {
-	iRunes := []rune(p[i].Name)
-	jRunes := []rune(p[j].Name)
+
+// SetID sets the id of a part
+func (t *Part) SetID(id uint64) {
+	t.Id = id
+}
+
+// Add adds a new type of part to the list
+func Add(partName, partType, partValue, partLocation, partDatasheet string) {
+	t := types.ByName(partType)
+	p := Part{
+		Name:      partName,
+		Type:      t.Id,
+		Value:     partValue,
+		Location:  partLocation,
+		Datasheet: partDatasheet,
+	}
+	err := db.Create(db.PartsBucket, &p)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// Rm removes a part from the list
+func Rm(name string) {
+	p := ByName(name)
+
+	err := db.Delete(db.PartsBucket, &p)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+// ByName returns a part by its name
+func ByName(name string) Part {
+	for _, e := range List() {
+		if e.Name == name {
+			return e
+		}
+	}
+	return Part{}
+}
+
+// List returns a sorted slice of parts
+func List() []Part {
+	var s []Part
+	m := db.GetAll(db.PartsBucket)
+	for _, e := range m {
+		t := Part{}
+		err := msgpack.Unmarshal(e, &t)
+		if err != nil {
+			log.Fatal(err)
+		}
+		s = append(s, t)
+	}
+
+	sort.Sort(PartSorter(s))
+
+	return s
+}
+
+type PartSorter []Part
+
+func (t PartSorter) Len() int {
+	return len(t)
+}
+func (t PartSorter) Swap(i, j int) {
+	t[i], t[j] = t[j], t[i]
+}
+func (t PartSorter) Less(i, j int) bool {
+	iRunes := []rune(t[i].Name)
+	jRunes := []rune(t[j].Name)
 
 	max := len(iRunes)
 	if max > len(jRunes) {

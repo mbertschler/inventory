@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"inventory/db"
+	"inventory/parts"
 	"inventory/types"
 	"log"
 	"os"
@@ -62,6 +63,8 @@ func add(c *ishell.Context) {
 	switch addType {
 	case "type":
 		types.Add(addName)
+	case "part":
+		addPart(c)
 	default:
 		fmt.Printf("can't add %s: unknown type", addType)
 		fmt.Println()
@@ -77,51 +80,77 @@ func rm(c *ishell.Context) {
 		return
 	}
 
-	addType := c.Args[0]
-	addName := strings.Join(c.Args[1:], " ")
+	rmType := c.Args[0]
+	rmName := strings.Join(c.Args[1:], " ")
 
-	switch addType {
+	switch rmType {
 	case "type":
-		types.Rm(addName)
+		types.Rm(rmName)
+	case "part":
+		parts.Rm(rmName)
 	default:
-		fmt.Printf("can't remove %s: unknown type", addType)
+		fmt.Printf("can't remove %s: unknown type", rmType)
 		fmt.Println()
 		return
 	}
 
-	fmt.Println("removed", addType, addName)
+	fmt.Println("removed", rmType, rmName)
 }
 
 func list(c *ishell.Context) {
 	if len(c.Args) < 1 {
-		listTypes()
-		listParts()
+		listTypes(c)
+		listParts(c)
 		return
 	}
 
 	switch c.Args[0] {
 	case "types":
-		listTypes()
+		listTypes(c)
 	case "parts":
-		listParts()
+		listParts(c)
 
 	default:
 		log.Fatalf("can't list %s: unknown type", os.Args[2])
 	}
 }
 
-func listTypes() {
-	fmt.Println("Types:")
-	for _, e := range types.List() {
-		fmt.Println("   ", e)
-	}
-	fmt.Println()
+func addPart(c *ishell.Context) {
+	// disable the '>>>' for cleaner same line input.
+	c.ShowPrompt(false)
+	defer c.ShowPrompt(true) // yes, revert after login.
+
+	// get name
+	partName := c.Args[1]
+	c.Println("Adding part ", partName)
+	// get type
+	c.Print("Type: ")
+	partType := c.ReadLine()
+	// get value
+	c.Print("Value: ")
+	partValue := c.ReadLine()
+	// get location
+	c.Print("Location: ")
+	partLocation := c.ReadLine()
+	// get datasheet
+	c.Print("Datasheet URL: ")
+	partDatasheet := c.ReadLine()
+
+	parts.Add(partName, partType, partValue, partLocation, partDatasheet)
 }
 
-func listParts() {
-	fmt.Println("parts:")
-	// for _, e := range parts.Parts {
-	// 	fmt.Println("   ", e)
-	// }
-	fmt.Println()
+func listTypes(c *ishell.Context) {
+	c.Println("Types:")
+	for _, e := range types.List() {
+		c.Println("   ", e)
+	}
+	c.Println()
+}
+
+func listParts(c *ishell.Context) {
+	c.Println("Parts:")
+	for _, e := range parts.List() {
+		c.Println("   ", e)
+	}
+	c.Println()
 }
