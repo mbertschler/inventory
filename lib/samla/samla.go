@@ -56,10 +56,6 @@ type Type struct {
 	Links     Links
 }
 
-type Reference struct {
-	id string
-}
-
 func NewDB() *DB {
 	return &DB{
 		types: map[string]Type{},
@@ -83,6 +79,15 @@ type boxField struct {
 
 type StoreInfo struct {
 	ID string
+}
+
+type Reference struct {
+	id  string
+	obj interface{}
+}
+
+func (r *Reference) ID() string {
+	return r.ID()
 }
 
 var shittyID int
@@ -149,7 +154,8 @@ func (d *DB) StoreAs(in interface{}, typ string) (StoreInfo, error) {
 	}
 	d.boxes[id] = b
 	ref.id = id
-	// log.Printf("stored %#v %#v\n", id, b)
+	ref.obj = in
+	log.Printf("stored %#v %+v\n", id, b)
 	return StoreInfo{ID: id}, nil
 }
 
@@ -159,6 +165,7 @@ func (d *DB) LoadID(out interface{}, id string) error {
 	b := d.boxes[id]
 	ref := t.Reference(out)
 	ref.id = id
+	ref.obj = out
 	for name, e := range t.Fields {
 		switch e.Type {
 		case String:

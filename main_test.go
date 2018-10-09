@@ -11,18 +11,24 @@ func init() {
 	log.SetFlags(log.Lshortfile)
 }
 
-func TestDB(t *testing.T) {
-	err := parts.Add("Part 1")
+func TestAdd(t *testing.T) {
+	err := parts.Reset()
 	if err != nil {
-		log.Println(err)
+		t.Error(err)
 	}
-	err = parts.Add("Part 2")
+	_, err = parts.Add("Part 1")
 	if err != nil {
-		log.Println(err)
+		t.Error(err)
 	}
+
+	_, err = parts.Add("Part 2")
+	if err != nil {
+		t.Error(err)
+	}
+
 	all, err := parts.All()
 	if err != nil {
-		log.Println(err)
+		t.Error(err)
 	}
 	for i, p := range all {
 		if i == 0 && p.Name != "Part 1" {
@@ -32,4 +38,18 @@ func TestDB(t *testing.T) {
 			t.Error("wrong data at ", i)
 		}
 	}
+}
+
+func TestEdit(t *testing.T) {
+	p1, err := parts.Add("Part 1")
+	if err != nil {
+		t.Error(err)
+	}
+	log.Printf("p1 %#v \n", p1)
+
+	all, err := parts.All()
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(all)
 }

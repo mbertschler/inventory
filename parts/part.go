@@ -15,13 +15,10 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	all := AllParts{}
-	info, err := db.StoreAs(&all, "AllParts")
+	err = Reset()
 	if err != nil {
 		log.Fatal(err)
 	}
-	allPartsID = info.ID
 }
 
 // Part is the central item in the inventory.
@@ -102,7 +99,7 @@ func All() ([]*Part, error) {
 }
 
 // Add adds a new Part to the database.
-func Add(name string) error {
+func Add(name string) (*Part, error) {
 	var all AllParts
 	err := db.LoadIDWith(&all, allPartsID, "Parts")
 	if err != nil {
@@ -113,5 +110,17 @@ func Add(name string) error {
 	all.Parts = append(all.Parts, &newPart)
 
 	_, err = db.StoreAsWith(&all, "AllParts", "Parts")
+	return &newPart, err
+}
+
+//
+func Reset() error {
+	// TODO actually reset the samla DB
+	all := AllParts{}
+	info, err := db.StoreAs(&all, "AllParts")
+	if err != nil {
+		log.Fatal(err)
+	}
+	allPartsID = info.ID
 	return err
 }
