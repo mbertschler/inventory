@@ -1,0 +1,5 @@
+# go dependencies
+vendor
+
+# code coverage profiles
+*.out

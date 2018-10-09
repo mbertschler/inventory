@@ -28,11 +28,11 @@ func init() {
 	if root == "" {
 		log.Fatal("couldn't find the project in GOPATH")
 	}
-	err := parts.Add("Capacitor")
+	_, err := parts.Add("Capacitor")
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = parts.Add("Resistor")
+	_, err = parts.Add("Resistor")
 	if err != nil {
 		log.Fatal(err)
 	}

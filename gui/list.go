@@ -24,7 +24,7 @@ func newPart(args json.RawMessage) (*guiapi.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = parts.Add(in.Name)
+	_, err = parts.Add(in.Name)
 	if err != nil {
 		return nil, err
 	}

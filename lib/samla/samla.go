@@ -155,7 +155,7 @@ func (d *DB) StoreAs(in interface{}, typ string) (StoreInfo, error) {
 	d.boxes[id] = b
 	ref.id = id
 	ref.obj = in
-	log.Printf("stored %#v %+v\n", id, b)
+	// log.Printf("stored %#v %+v\n", id, b)
 	return StoreInfo{ID: id}, nil
 }
 
