@@ -33,10 +33,15 @@ function guiapi(name, args) {
 
 var callableFunctions = {
 	"setURL": setURL,
+	"redirect": redirect,
 }
 
 function setURL(args) {
 	history.pushState(args[0], args[1], args[2])
+}
+
+function redirect(path) {
+	window.location = path
 }
 
 function handleResponse(resp) {

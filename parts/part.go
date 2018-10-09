@@ -136,6 +136,11 @@ func ByID(id string) (*Part, error) {
 	return &p, nil
 }
 
+// DeleteByID deletes a Part that is already in the DB.
+func DeleteByID(id string) error {
+	return db.DeleteID(id)
+}
+
 // Store saves a Part that is already in the DB.
 func Store(p *Part) error {
 	info, err := db.StoreAs(&p, "Part")

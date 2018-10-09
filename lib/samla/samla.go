@@ -1,6 +1,7 @@
 package samla
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -162,7 +163,10 @@ func (d *DB) StoreAs(in interface{}, typ string) (StoreInfo, error) {
 func (d *DB) LoadID(out interface{}, id string) error {
 	typ := getShittyType(id)
 	t := d.types[typ]
-	b := d.boxes[id]
+	b, ok := d.boxes[id]
+	if !ok {
+		return fmt.Errorf("samla: id %s not found", id)
+	}
 	ref := t.Reference(out)
 	ref.id = id
 	ref.obj = out
@@ -209,6 +213,11 @@ func (d *DB) LoadIDWith(out interface{}, id string, links ...string) error {
 			l.Set(out, l.FromSlice(arr))
 		}
 	}
+	return nil
+}
+
+func (d *DB) DeleteID(id string) error {
+	delete(d.boxes, id)
 	return nil
 }
 

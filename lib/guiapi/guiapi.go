@@ -33,6 +33,23 @@ func Replace(selector string, block html.Block) (*Result, error) {
 	return ret, nil
 }
 
+// Redirect lets the browser navigate to a given path
+func Redirect(path string) (*Result, error) {
+	args, err := json.Marshal(path)
+	if err != nil {
+		return nil, err
+	}
+	ret := &Result{
+		JS: []JSCall{
+			{
+				Name:      "redirect",
+				Arguments: args,
+			},
+		},
+	}
+	return ret, nil
+}
+
 // ============================================
 // Logic
 // ============================================
