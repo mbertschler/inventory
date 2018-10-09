@@ -10,7 +10,7 @@ import (
 )
 
 func HandleFunc(w http.ResponseWriter, r *http.Request) {
-	page := mainLayout(html.Text("hihi"))
+	page := mainLayout(listBlock())
 	err := html.Render(page, w)
 	if err != nil {
 		log.Println(err)
@@ -28,7 +28,7 @@ func mainLayout(content html.Block) html.Block {
 func layoutHead() html.Block {
 	return html.Head(nil,
 		html.Meta(html.Charset("utf-8")),
-		html.Meta(html.Attr{{Key: "http-equiv", Value: "X-UA-Compatible"}}.Content("IE=edge,chome=1")),
+		html.Meta(html.Attr("http-equiv", "X-UA-Compatible").Content("IE=edge,chome=1")),
 		html.Meta(html.Name("viewport").Content("width=device-width, initial-scale=1.0, maximum-scale=1.0")),
 		html.Meta(html.Name("apple-mobile-web-app-capable").Content("yes")),
 		html.Title(nil,

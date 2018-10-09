@@ -1,5 +1,15 @@
 console.log("app.js loaded");
 
+function sendForm(action, selector) {
+	console.log(action, selector)
+	var elements = $(selector)
+	var data = {}
+	for (var i = 0; i < elements.length; i++) {
+		data[elements[i].name] = elements[i].value 
+	}
+	callGuiAPI(action, data)
+}
+
 // ================= GUI API =================
 function callGuiAPI(name, args) {
 	var req = {
@@ -10,7 +20,7 @@ function callGuiAPI(name, args) {
 	}
 	$.ajax({
 		method: "POST",
-		url: "/gui/",
+		url: "/guiapi/",
 		data: JSON.stringify(req),
 		success: function (data) {
 			var ret = JSON.parse(data)
@@ -31,10 +41,10 @@ function setURL(args) {
 }
 
 function handleResponse(resp) {
-	for (var i=0; i< resp.Results.length; i++) {
+	for (var i =0; i < resp.Results.length; i++) {
 		var r = resp.Results[i]
 		if (r.HTML) {
-			for (var j=0; j< r.HTML.length; j++) {
+			for (var j = 0; j < r.HTML.length; j++) {
 				var update = r.HTML[j]
 				if (update.Operation == 1) {
 					$(update.Selector).html(update.Content)

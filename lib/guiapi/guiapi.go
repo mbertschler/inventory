@@ -6,15 +6,17 @@ import (
 	"log"
 	"net/http"
 
-	"git.exahome.net/tools/blocks/html"
+	"github.com/mbertschler/blocks/html"
 )
 
 // DefaultHandler is an empty guiapi handler ready for use.
-var DefaultHandler = Handler{}
+var DefaultHandler = Handler{
+	Functions: map[string]Callable{},
+}
 
-// ReplaceContainer is a helper function that returns a Result that
-// replaces the id "container" with the passed Block.
-func ReplaceContainer(block html.Block) (*Result, error) {
+// Replace is a helper function that returns a Result that
+// replaces the element chosen by the selector with the passed Block.
+func Replace(selector string, block html.Block) (*Result, error) {
 	out, err := html.RenderString(block)
 	if err != nil {
 		return nil, err
@@ -23,7 +25,7 @@ func ReplaceContainer(block html.Block) (*Result, error) {
 		HTML: []HTMLUpdate{
 			{
 				Operation: HTMLReplace,
-				Selector:  "#container",
+				Selector:  selector,
 				Content:   out,
 			},
 		},
