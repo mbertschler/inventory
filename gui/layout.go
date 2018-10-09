@@ -9,7 +9,7 @@ import (
 	"github.com/mbertschler/blocks/html"
 )
 
-func HandleFunc(w http.ResponseWriter, r *http.Request) {
+func rootPage(w http.ResponseWriter, r *http.Request) {
 	page := mainLayout(listBlock())
 	err := html.Render(page, w)
 	if err != nil {

@@ -2,6 +2,7 @@ package gui
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/mbertschler/blocks/html"
@@ -11,7 +12,7 @@ import (
 )
 
 func init() {
-	// setup guiapi function
+	// setup guiapi action
 	guiapi.DefaultHandler.Functions["newPart"] = newPart
 }
 
@@ -38,9 +39,11 @@ func listBlock() html.Block {
 	}
 	list := html.Blocks{}
 	for _, p := range parts {
-		list.Add(html.Div(
-			html.Class("item"), html.Text(p.Name)),
-		)
+		link := fmt.Sprintf("/part/%s", p.ID())
+		list.Add(html.A(html.Href(link),
+			html.Div(html.Class("item"),
+				html.Text(p.Name)),
+		))
 	}
 	return html.Div(html.Class("ui list"),
 		list,

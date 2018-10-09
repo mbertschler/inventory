@@ -113,7 +113,7 @@ func Add(name string) (*Part, error) {
 	return &newPart, err
 }
 
-//
+// Reset clears the list that contains all parts.
 func Reset() error {
 	// TODO actually reset the samla DB
 	all := AllParts{}
@@ -122,5 +122,23 @@ func Reset() error {
 		log.Fatal(err)
 	}
 	allPartsID = info.ID
+	return err
+}
+
+// ByID loads a Part by an ID.
+func ByID(id string) (*Part, error) {
+	var p Part
+	err := db.LoadID(&p, id)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return &p, nil
+}
+
+// Store saves a Part that is already in the DB.
+func Store(p *Part) error {
+	info, err := db.StoreAs(&p, "Part")
+	log.Println("Store:", info)
 	return err
 }

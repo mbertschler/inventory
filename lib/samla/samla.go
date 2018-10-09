@@ -87,7 +87,7 @@ type Reference struct {
 }
 
 func (r *Reference) ID() string {
-	return r.ID()
+	return r.id
 }
 
 var shittyID int

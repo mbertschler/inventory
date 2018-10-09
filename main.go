@@ -48,6 +48,6 @@ func main() {
 	log.Println("inventory server at :5080")
 	http.Handle("/js/", fileServer("/js/", root, "gui", "js"))
 	http.Handle("/guiapi/", guiapi.DefaultHandler)
-	http.HandleFunc("/", gui.HandleFunc)
+	http.Handle("/", gui.Router())
 	log.Println(http.ListenAndServe(":5080", nil))
 }
