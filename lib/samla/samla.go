@@ -58,24 +58,28 @@ type Type struct {
 }
 
 func NewDB() *DB {
+	s, err := newMemoryStore()
+	if err != nil {
+		log.Fatal(err)
+	}
 	return &DB{
+		store: s,
 		types: map[string]Type{},
-		boxes: map[string]box{},
 	}
 }
 
 type DB struct {
+	store store
 	types map[string]Type
-	boxes map[string]box
 }
 
 type box struct {
-	fields map[string]boxField
-	links  map[string][]string
+	Fields map[string]boxField
+	Links  map[string][]string
 }
 
 type boxField struct {
-	value interface{}
+	Value interface{}
 }
 
 type StoreInfo struct {
@@ -108,15 +112,15 @@ func (d *DB) StoreAsWith(in interface{}, typ string, links ...string) (StoreInfo
 		return info, err
 	}
 	t := d.types[typ]
-	b := d.boxes[info.ID]
-	b.links = map[string][]string{}
+	b, _ := d.store.Get(info.ID)
+	b.Links = map[string][]string{}
 	for _, e := range links {
 		l := t.Links[e]
 		switch l.Kind {
 		case Pointer:
 			o := l.Get(in)
 			inf, _ := d.StoreAs(o, l.Type)
-			b.links[e] = []string{inf.ID}
+			b.Links[e] = []string{inf.ID}
 		case PointerSlice:
 			o := l.Get(in)
 			arr := l.ToSlice(o)
@@ -128,17 +132,17 @@ func (d *DB) StoreAsWith(in interface{}, typ string, links ...string) (StoreInfo
 				}
 				links[i] = info.ID
 			}
-			b.links[e] = links
+			b.Links[e] = links
 		}
 	}
-	d.boxes[info.ID] = b
-	return info, nil
+	err = d.store.Set(info.ID, b)
+	return info, err
 }
 
 func (d *DB) StoreAs(in interface{}, typ string) (StoreInfo, error) {
 	t := d.types[typ]
 	b := box{
-		fields: map[string]boxField{},
+		Fields: map[string]boxField{},
 	}
 	ref := t.Reference(in)
 	id := ref.id
@@ -149,21 +153,21 @@ func (d *DB) StoreAs(in interface{}, typ string) (StoreInfo, error) {
 		switch e.Type {
 		case String:
 			s := e.Get(in)
-			f := boxField{value: s}
-			b.fields[name] = f
+			f := boxField{Value: s}
+			b.Fields[name] = f
 		}
 	}
-	d.boxes[id] = b
+	err := d.store.Set(id, b)
 	ref.id = id
 	ref.obj = in
 	// log.Printf("stored %#v %+v\n", id, b)
-	return StoreInfo{ID: id}, nil
+	return StoreInfo{ID: id}, err
 }
 
 func (d *DB) LoadID(out interface{}, id string) error {
 	typ := getShittyType(id)
 	t := d.types[typ]
-	b, ok := d.boxes[id]
+	b, ok := d.store.Get(id)
 	if !ok {
 		return fmt.Errorf("samla: id %s not found", id)
 	}
@@ -173,7 +177,7 @@ func (d *DB) LoadID(out interface{}, id string) error {
 	for name, e := range t.Fields {
 		switch e.Type {
 		case String:
-			e.Set(out, b.fields[name].value)
+			e.Set(out, b.Fields[name].Value)
 		}
 	}
 	return nil
@@ -186,12 +190,12 @@ func (d *DB) LoadIDWith(out interface{}, id string, links ...string) error {
 	}
 	typ := getShittyType(id)
 	t := d.types[typ]
-	b := d.boxes[id]
+	b, _ := d.store.Get(id)
 	for _, e := range links {
 		l := t.Links[e]
 		switch l.Kind {
 		case Pointer:
-			ids := b.links[e]
+			ids := b.Links[e]
 			if len(ids) > 0 {
 				linkType := d.types[l.Type]
 				o := linkType.New()
@@ -199,7 +203,7 @@ func (d *DB) LoadIDWith(out interface{}, id string, links ...string) error {
 				l.Set(out, o)
 			}
 		case PointerSlice:
-			ids := b.links[e]
+			ids := b.Links[e]
 			arr := make([]interface{}, len(ids))
 			linkType := d.types[l.Type]
 			for i := range ids {
@@ -217,7 +221,7 @@ func (d *DB) LoadIDWith(out interface{}, id string, links ...string) error {
 }
 
 func (d *DB) DeleteID(id string) error {
-	delete(d.boxes, id)
+	d.store.Delete(id)
 	return nil
 }
 
