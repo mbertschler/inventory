@@ -57,8 +57,19 @@ type Type struct {
 	Links     Links
 }
 
-func NewDB() *DB {
+func NewMemoryDB() *DB {
 	s, err := newMemoryStore()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &DB{
+		store: s,
+		types: map[string]Type{},
+	}
+}
+
+func NewFileDB(path string) *DB {
+	s, err := newEmbedStore(path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -103,6 +114,7 @@ func newShittyID(typ string) string {
 }
 
 func getShittyType(id string) string {
+	log.Println(id, strings.Index(id, "/"))
 	return id[:strings.Index(id, "/")]
 }
 

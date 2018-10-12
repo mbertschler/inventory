@@ -10,7 +10,7 @@ var db *samla.DB
 var allPartsID string
 
 func init() {
-	db = samla.NewDB()
+	db = samla.NewMemoryDB()
 	err := db.RegisterTypes(partType, allPartsType)
 	if err != nil {
 		log.Fatal(err)
