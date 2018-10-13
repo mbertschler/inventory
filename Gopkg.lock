@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:c28625428387b63dd7154eb857f51e700465cfbf7c06f619e71f2da33cefe47e"
+  name = "github.com/etcd-io/bbolt"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "583e8937c61f1af6513608ccc75c97b6abdf4ff9"
+  version = "v1.3.0"
+
+[[projects]]
   branch = "master"
   digest = "1:de394ceaff161d63657f01b98882a9a69ca025e512af1b94f963de10a1114035"
   name = "github.com/mbertschler/blocks"
@@ -9,9 +17,20 @@
   pruneopts = "UT"
   revision = "a7ed445b005f7952b29ce54e71827922e31e7050"
 
+[[projects]]
+  branch = "master"
+  digest = "1:0a40b0bdd57a93e741d8557465be3a2edeec408e9b6399586ad65bbe8e355796"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  pruneopts = "UT"
+  revision = "fa43e7bc11baaae89f3f902b2b4d832b68234844"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/mbertschler/blocks/html"]
+  input-imports = [
+    "github.com/etcd-io/bbolt",
+    "github.com/mbertschler/blocks/html",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
