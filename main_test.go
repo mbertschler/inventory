@@ -11,7 +11,7 @@ func init() {
 	log.SetFlags(log.Lshortfile)
 }
 
-func TestAdd(t *testing.T) {
+func SkipTestAdd(t *testing.T) {
 	err := parts.Reset()
 	if err != nil {
 		t.Error(err)
@@ -40,7 +40,7 @@ func TestAdd(t *testing.T) {
 	}
 }
 
-func TestEdit(t *testing.T) {
+func SkipTestEdit(t *testing.T) {
 	p1, err := parts.Add("Part 1")
 	if err != nil {
 		t.Error(err)

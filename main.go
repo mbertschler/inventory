@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -28,14 +29,6 @@ func init() {
 	if root == "" {
 		log.Fatal("couldn't find the project in GOPATH")
 	}
-	_, err := parts.Add("Capacitor")
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = parts.Add("Resistor")
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func fileServer(url string, path ...string) http.Handler {
@@ -45,6 +38,15 @@ func fileServer(url string, path ...string) http.Handler {
 }
 
 func main() {
+	flag.Parse()
+	args := flag.Args()
+	if len(args) < 1 {
+		log.Fatal("first argument needs to be a database file path")
+	}
+	err := parts.SetupDB(args[0])
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Println("inventory server at :5080")
 	http.Handle("/js/", fileServer("/js/", root, "gui", "js"))
 	http.Handle("/guiapi/", guiapi.DefaultHandler)
