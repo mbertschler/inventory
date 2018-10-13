@@ -29,7 +29,16 @@ func (r Ref) ID() string {
 // Part is the central item in the inventory.
 type Part struct {
 	Ref
-	Name string
+	Code     string
+	Name     string
+	Location string
+	Parent   string
+
+	Supplier string
+	Price    int
+	Delivery int
+
+	Values map[string]string
 }
 
 // SetupDB opens the database.
