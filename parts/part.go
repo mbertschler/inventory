@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/etcd-io/bbolt"
+	"github.com/boltdb/bolt"
 )
 
 var (
