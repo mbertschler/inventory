@@ -13,10 +13,10 @@ import (
 
 func init() {
 	// setup guiapi action
-	guiapi.DefaultHandler.Functions["newPart"] = newPart
+	guiapi.DefaultHandler.Functions["newPart"] = newPartAction
 }
 
-func newPart(args json.RawMessage) (*guiapi.Result, error) {
+func newPartAction(args json.RawMessage) (*guiapi.Result, error) {
 	type input struct {
 		Name string
 	}
@@ -25,11 +25,11 @@ func newPart(args json.RawMessage) (*guiapi.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = parts.Add(in.Name)
+	p, err := parts.Add(in.Name)
 	if err != nil {
 		return nil, err
 	}
-	return guiapi.Replace("#container", listBlock())
+	return guiapi.Replace("#container", editPartBlock(p))
 }
 
 func listBlock() html.Block {
@@ -53,5 +53,5 @@ func listBlock() html.Block {
 
 var newPartForm = html.Div(html.Class("ui fluid action input"),
 	html.Input(html.Type("text").Attr("placeholder", "Add").Name("Name").Class("ga-new-part")),
-	html.Div(html.Class("ui button").Attr("onclick", "sendForm('newPart','.ga-new-part')"), html.Text("Add")),
+	html.Div(html.Class("ui button").Attr("onclick", "sendForm('newPart', '.ga-new-part')"), html.Text("Add")),
 )

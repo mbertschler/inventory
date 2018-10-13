@@ -1,5 +1,3 @@
-console.log("app.js loaded");
-
 function sendForm(action, selector) {
 	var elements = $(selector)
 	var data = {}
@@ -47,6 +45,11 @@ function redirect(path) {
 function handleResponse(resp) {
 	for (var i =0; i < resp.Results.length; i++) {
 		var r = resp.Results[i]
+		if (r.Error){
+			console.error(r.Error)
+			window.alert("guiapi error, check console")
+			continue
+		}
 		if (r.HTML) {
 			for (var j = 0; j < r.HTML.length; j++) {
 				var update = r.HTML[j]
