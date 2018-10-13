@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	db *bbolt.DB
+	db *bolt.DB
 
 	partsBucket = []byte("p")
 )
@@ -44,7 +44,7 @@ type Part struct {
 // SetupDB opens the database.
 func SetupDB(path string) error {
 	var err error
-	db, err = bbolt.Open(path, 0644, nil)
+	db, err = bolt.Open(path, 0644, nil)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func SetupDB(path string) error {
 
 func initDB() error {
 	rand.Seed(time.Now().Unix())
-	return db.Update(func(tx *bbolt.Tx) error {
+	return db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists(partsBucket)
 		return err
 	})
@@ -62,7 +62,7 @@ func initDB() error {
 // All returns all Parts from the database.
 func All() ([]*Part, error) {
 	var all []*Part
-	err := db.View(func(tx *bbolt.Tx) error {
+	err := db.View(func(tx *bolt.Tx) error {
 		return tx.Bucket(partsBucket).ForEach(func(k, v []byte) error {
 			p, err := unpackPart(k, v)
 			if err != nil {
@@ -122,7 +122,7 @@ func Add(name string) (*Part, error) {
 	newPart := Part{Name: name}
 	_, v, err := packPart(&newPart)
 	k := randomKey()
-	err = db.Update(func(tx *bbolt.Tx) error {
+	err = db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(partsBucket)
 		for {
 			if b.Get(k) == nil {
@@ -132,12 +132,13 @@ func Add(name string) (*Part, error) {
 			k = randomKey()
 		}
 	})
+	newPart.Ref.id = k
 	return &newPart, err
 }
 
 // Reset clears the list that contains all parts.
 func Reset() error {
-	return db.Update(func(tx *bbolt.Tx) error {
+	return db.Update(func(tx *bolt.Tx) error {
 		err := tx.DeleteBucket(partsBucket)
 		if err != nil {
 			return err
@@ -154,7 +155,7 @@ func ByID(id string) (*Part, error) {
 		return nil, err
 	}
 	var v []byte
-	err = db.View(func(tx *bbolt.Tx) error {
+	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(partsBucket)
 		v = b.Get(k)
 		return nil
@@ -172,7 +173,7 @@ func DeleteByID(id string) error {
 	if err != nil {
 		return err
 	}
-	return db.Update(func(tx *bbolt.Tx) error {
+	return db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(partsBucket)
 		return b.Delete(k)
 	})
@@ -187,7 +188,7 @@ func Store(p *Part) error {
 	if k == nil {
 		return errors.New("store: new part has no key yet")
 	}
-	return db.Update(func(tx *bbolt.Tx) error {
+	return db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(partsBucket)
 		return b.Put(k, v)
 	})
