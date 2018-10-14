@@ -85,12 +85,12 @@ func editPartBlock(p *parts.Part) html.Block {
 				html.Input(html.Type("Text").Name("Supplier").Value(p.Supplier).Class("ga-edit-part")),
 			),
 			html.Div(html.Class("field"),
-				html.Label(nil, html.Text("Price (in cents)")),
-				html.Input(html.Type("Number").Name("Price").Value(p.Price).Class("ga-edit-part")),
+				html.Label(nil, html.Text("Price (in €, format: 12.34)")),
+				html.Input(html.Type("Number").Attr("step", "0.01").Name("Price").Value(float64(p.Price)/100).Class("ga-edit-part")),
 			),
 			html.Div(html.Class("field"),
-				html.Label(nil, html.Text("Delivery (in cents)")),
-				html.Input(html.Type("Number").Name("Delivery").Value(p.Delivery).Class("ga-edit-part")),
+				html.Label(nil, html.Text("Delivery (in €, format: 12.34)")),
+				html.Input(html.Type("Number").Name("Delivery").Value(float64(p.Delivery)/100).Class("ga-edit-part")),
 			),
 		),
 	)
@@ -121,16 +121,16 @@ func savePartAction(args json.RawMessage) (*guiapi.Result, error) {
 	p.Location = in.Location
 	p.Parent = in.Parent
 	p.Supplier = in.Supplier
-	price, err := strconv.Atoi(in.Price)
+	price, err := strconv.ParseFloat(in.Price, 64)
 	if err != nil {
 		return nil, err
 	}
-	p.Price = price
-	delivery, err := strconv.Atoi(in.Delivery)
+	p.Price = int(price * 100)
+	delivery, err := strconv.ParseFloat(in.Delivery, 64)
 	if err != nil {
 		return nil, err
 	}
-	p.Delivery = delivery
+	p.Delivery = int(delivery * 100)
 	err = parts.Store(p)
 	if err != nil {
 		return nil, err
