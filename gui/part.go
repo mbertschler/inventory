@@ -82,7 +82,7 @@ func editPartBlock(p *parts.Part) html.Block {
 			),
 			html.Div(html.Class("field"),
 				html.Label(nil, html.Text("Size")),
-				html.Input(html.Type("Text").Name("Size").Value(p.Value).Class("ga-edit-part")),
+				html.Input(html.Type("Text").Name("Size").Value(p.Size).Class("ga-edit-part")),
 			),
 			html.Div(html.Class("field"),
 				html.Label(nil, html.Text("Quantity")),
