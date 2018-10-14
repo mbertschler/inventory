@@ -65,12 +65,28 @@ func editPartBlock(p *parts.Part) html.Block {
 		html.Div(html.Class("ui form"),
 			html.Input(html.Type("hidden").Name("ID").Value(p.ID()).Class("ga-edit-part")),
 			html.Div(html.Class("field"),
+				html.Label(nil, html.Text("Code")),
+				html.Input(html.Type("Text").Name("Code").Value(p.Code).Class("ga-edit-part")),
+			),
+			html.Div(html.Class("field"),
 				html.Label(nil, html.Text("Name")),
 				html.Input(html.Type("Text").Name("Name").Value(p.Name).Class("ga-edit-part")),
 			),
 			html.Div(html.Class("field"),
-				html.Label(nil, html.Text("Code")),
-				html.Input(html.Type("Text").Name("Code").Value(p.Code).Class("ga-edit-part")),
+				html.Label(nil, html.Text("Type (R, C, npn Mosfet)")),
+				html.Input(html.Type("Text").Name("Type").Value(p.Type).Class("ga-edit-part")),
+			),
+			html.Div(html.Class("field"),
+				html.Label(nil, html.Text("Value (format: 5.8k, 10, 5u)")),
+				html.Input(html.Type("Text").Name("Value").Value(p.Value).Class("ga-edit-part")),
+			),
+			html.Div(html.Class("field"),
+				html.Label(nil, html.Text("Size")),
+				html.Input(html.Type("Text").Name("Size").Value(p.Value).Class("ga-edit-part")),
+			),
+			html.Div(html.Class("field"),
+				html.Label(nil, html.Text("Quantity")),
+				html.Input(html.Type("Number").Name("Quantity").Value(p.Quantity).Class("ga-edit-part")),
 			),
 			html.Div(html.Class("field"),
 				html.Label(nil, html.Text("Location")),
@@ -100,7 +116,11 @@ func savePartAction(args json.RawMessage) (*guiapi.Result, error) {
 	type input struct {
 		ID       string
 		Name     string
+		Type     string
+		Value    string
 		Code     string
+		Size     string
+		Quantity string
 		Location string
 		Parent   string
 		Supplier string
@@ -117,8 +137,16 @@ func savePartAction(args json.RawMessage) (*guiapi.Result, error) {
 		return nil, err
 	}
 	p.Name = in.Name
+	p.Type = in.Type
+	p.Value = in.Value
 	p.Code = in.Code
+	p.Size = in.Size
 	p.Location = in.Location
+	quant, err := strconv.Atoi(in.Quantity)
+	if err != nil {
+		return nil, err
+	}
+	p.Quantity = quant
 	p.Parent = in.Parent
 	p.Supplier = in.Supplier
 	price, err := strconv.ParseFloat(in.Price, 64)
@@ -176,7 +204,11 @@ func viewPartBlock(p *parts.Part) html.Block {
 		)
 	}
 	rows.Add(r("Code", p.Code))
+	rows.Add(r("Type", p.Type))
+	rows.Add(r("Value", p.Value))
+	rows.Add(r("Size", p.Size))
 	rows.Add(r("Location", p.Location))
+	rows.Add(r("Quantity", fmt.Sprint(p.Quantity)))
 	rows.Add(r("Parent", p.Parent))
 	rows.Add(r("Supplier", p.Supplier))
 	rows.Add(r("Price", fmt.Sprintf("%.2f€", float64(p.Price)/100)))

@@ -42,7 +42,8 @@ func listBlock() html.Block {
 		link := fmt.Sprintf("/part/%s", p.ID())
 		list.Add(html.A(html.Href(link),
 			html.Div(html.Class("item"),
-				html.Text(p.Name)),
+				html.Text(fmt.Sprintf("%s: %s %s %s", p.Name, p.Type, p.Value, p.Size)),
+			),
 		))
 	}
 	return html.Div(html.Class("ui list"),

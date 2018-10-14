@@ -31,6 +31,10 @@ type Part struct {
 	Ref
 	Code     string
 	Name     string
+	Type     string
+	Value    string
+	Size     string
+	Quantity int
 	Location string
 	Parent   string
 
