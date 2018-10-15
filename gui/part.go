@@ -116,12 +116,12 @@ func editPartBlock(p *parts.Part) html.Block {
 				html.Input(html.Type("Text").Name("Supplier").Value(p.Supplier).Class("ga-edit-part")),
 			),
 			html.Div(html.Class("field"),
-				html.Label(nil, html.Text("Price (in €, format: 12.34)")),
-				html.Input(html.Type("Number").Attr("step", "0.01").Name("Price").Value(float64(p.Price)/100).Class("ga-edit-part")),
+				html.Label(nil, html.Text("Price (in €, format: 12.3456)")),
+				html.Input(html.Type("Number").Attr("step", "0.01").Name("Price").Value(float64(p.Price)/10000).Class("ga-edit-part")),
 			),
 			html.Div(html.Class("field"),
-				html.Label(nil, html.Text("Delivery (in €, format: 12.34)")),
-				html.Input(html.Type("Number").Name("Delivery").Value(float64(p.Delivery)/100).Class("ga-edit-part")),
+				html.Label(nil, html.Text("Delivery (in €, format: 12.3456)")),
+				html.Input(html.Type("Number").Name("Delivery").Value(float64(p.Delivery)/10000).Class("ga-edit-part")),
 			),
 		),
 	)
@@ -176,16 +176,19 @@ func savePartAction(args json.RawMessage) (*guiapi.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	p.Price = int(price * 100)
+	p.Price = int(price * 10000)
 	delivery, err := strconv.ParseFloat(in.Delivery, 64)
 	if err != nil {
 		return nil, err
 	}
-	p.Delivery = int(delivery * 100)
+	p.Delivery = int(delivery * 10000)
+
+	// store part
 	err = parts.Store(p)
 	if err != nil {
 		return nil, err
 	}
+
 	return guiapi.Replace("#container", viewPartBlock(p))
 }
 
@@ -235,8 +238,8 @@ func viewPartBlock(p *parts.Part) html.Block {
 	rows.Add(r("Location", p.Location))
 	rows.Add(r("Parent", p.Parent))
 	rows.Add(r("Supplier", p.Supplier))
-	rows.Add(r("Price", fmt.Sprintf("%.2f€", float64(p.Price)/100)))
-	rows.Add(r("Delivery", fmt.Sprintf("%.2f€", float64(p.Delivery)/100)))
+	rows.Add(r("Price", fmt.Sprintf("%.4f€", float64(p.Price)/10000)))
+	rows.Add(r("Delivery", fmt.Sprintf("%.2f€", float64(p.Delivery)/10000)))
 
 	return html.Div(nil,
 		html.Div(nil,
