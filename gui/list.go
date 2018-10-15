@@ -17,7 +17,7 @@ func listBlock() html.Block {
 	list := html.Blocks{}
 	for _, p := range parts {
 		link := fmt.Sprintf("/part/%s", p.ID())
-		list.Add(html.Elem("tr", nil,
+		list.Add(html.Elem("tr", html.Attr("onclick", "redirect('"+link+"')"),
 			html.Elem("td", nil, html.Text(p.Code)),
 			html.Elem("td", nil, html.Text(p.Name)),
 			html.Elem("td", nil, html.Text(p.Type)),
@@ -25,7 +25,6 @@ func listBlock() html.Block {
 			html.Elem("td", nil, html.Text(p.Size)),
 			html.Elem("td", nil, html.Text(fmt.Sprint(p.Quantity))),
 			html.Elem("td", nil, html.Text(p.Location)),
-			html.Elem("td", nil, html.A(html.Href(link), html.Text("View Part"))),
 		))
 	}
 	return html.Div(html.Class("ui list"),
@@ -40,7 +39,6 @@ func listBlock() html.Block {
 					html.Elem("th", nil, html.Text("Size")),
 					html.Elem("th", nil, html.Text("Quantity")),
 					html.Elem("th", nil, html.Text("Location")),
-					html.Elem("th", nil, html.Text("View Part")),
 				),
 			), html.Elem("tbody", nil,
 				list,

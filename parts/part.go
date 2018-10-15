@@ -31,6 +31,7 @@ type Part struct {
 	Ref
 	Code     string
 	Name     string
+	Serial   string
 	Type     string
 	Value    string
 	Size     string

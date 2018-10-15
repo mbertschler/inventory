@@ -96,6 +96,10 @@ func editPartBlock(p *parts.Part) html.Block {
 				html.Input(html.Type("Text").Name("Size").Value(p.Size).Class("ga-edit-part")),
 			),
 			html.Div(html.Class("field"),
+				html.Label(nil, html.Text("Serial")),
+				html.Input(html.Type("Text").Name("Serial").Value(p.Serial).Class("ga-edit-part")),
+			),
+			html.Div(html.Class("field"),
 				html.Label(nil, html.Text("Quantity")),
 				html.Input(html.Type("Number").Name("Quantity").Value(p.Quantity).Class("ga-edit-part")),
 			),
@@ -130,6 +134,7 @@ func savePartAction(args json.RawMessage) (*guiapi.Result, error) {
 		Name     string
 		Type     string
 		Value    string
+		Serial   string
 		Code     string
 		Size     string
 		Quantity string
@@ -157,6 +162,7 @@ func savePartAction(args json.RawMessage) (*guiapi.Result, error) {
 	p.Type = in.Type
 	p.Value = in.Value
 	p.Code = in.Code
+	p.Serial = in.Serial
 	p.Size = in.Size
 	p.Location = in.Location
 	quant, err := strconv.Atoi(in.Quantity)
@@ -224,8 +230,9 @@ func viewPartBlock(p *parts.Part) html.Block {
 	rows.Add(r("Type", p.Type))
 	rows.Add(r("Value", p.Value))
 	rows.Add(r("Size", p.Size))
-	rows.Add(r("Location", p.Location))
+	rows.Add(r("Serial", p.Serial))
 	rows.Add(r("Quantity", fmt.Sprint(p.Quantity)))
+	rows.Add(r("Location", p.Location))
 	rows.Add(r("Parent", p.Parent))
 	rows.Add(r("Supplier", p.Supplier))
 	rows.Add(r("Price", fmt.Sprintf("%.2f€", float64(p.Price)/100)))
