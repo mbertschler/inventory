@@ -121,9 +121,9 @@ func randomKey() []byte {
 	return idToKey(u)
 }
 
-// Add adds a new Part to the database.
-func Add(name string) (*Part, error) {
-	newPart := Part{Name: name}
+// Create adds a new empty Part to the database.
+func Create() (*Part, error) {
+	newPart := Part{}
 	_, v, err := packPart(&newPart)
 	k := randomKey()
 	err = db.Update(func(tx *bolt.Tx) error {

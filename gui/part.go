@@ -17,6 +17,7 @@ import (
 func init() {
 	// setup guiapi action
 	guiapi.DefaultHandler.Functions["viewPart"] = viewPartAction
+	guiapi.DefaultHandler.Functions["newPart"] = newPartAction
 	guiapi.DefaultHandler.Functions["editPart"] = editPartAction
 	guiapi.DefaultHandler.Functions["savePart"] = savePartAction
 	guiapi.DefaultHandler.Functions["deletePart"] = deletePartAction
@@ -35,6 +36,10 @@ func partPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func newPartAction(_ json.RawMessage) (*guiapi.Result, error) {
+	return guiapi.Replace("#container", editPartBlock(nil))
+}
+
 func editPartAction(args json.RawMessage) (*guiapi.Result, error) {
 	var id string
 	err := json.Unmarshal(args, &id)
@@ -49,6 +54,11 @@ func editPartAction(args json.RawMessage) (*guiapi.Result, error) {
 }
 
 func editPartBlock(p *parts.Part) html.Block {
+	isNew := false
+	if p == nil {
+		isNew = true
+		p = &parts.Part{}
+	}
 	cancelAction := fmt.Sprintf("guiapi('viewPart', '%s')", p.ID())
 	saveAction := "sendForm('savePart', '.ga-edit-part')"
 	return html.Div(nil,
@@ -63,6 +73,7 @@ func editPartBlock(p *parts.Part) html.Block {
 			),
 		),
 		html.Div(html.Class("ui form"),
+			html.Input(html.Type("hidden").Name("New").Value(isNew).Class("ga-edit-part")),
 			html.Input(html.Type("hidden").Name("ID").Value(p.ID()).Class("ga-edit-part")),
 			html.Div(html.Class("field"),
 				html.Label(nil, html.Text("Code")),
@@ -115,6 +126,7 @@ func editPartBlock(p *parts.Part) html.Block {
 func savePartAction(args json.RawMessage) (*guiapi.Result, error) {
 	type input struct {
 		ID       string
+		New      string
 		Name     string
 		Type     string
 		Value    string
@@ -132,7 +144,12 @@ func savePartAction(args json.RawMessage) (*guiapi.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	p, err := parts.ByID(in.ID)
+	var p *parts.Part
+	if in.New == "true" {
+		p, err = parts.Create()
+	} else {
+		p, err = parts.ByID(in.ID)
+	}
 	if err != nil {
 		return nil, err
 	}
