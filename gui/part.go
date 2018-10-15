@@ -183,6 +183,12 @@ func savePartAction(args json.RawMessage) (*guiapi.Result, error) {
 	}
 	p.Delivery = int(delivery * 10000)
 
+	// generate name for some parts
+	switch p.Type {
+	case "R", "L", "C", "CP":
+		p.Name = p.Type + p.Size + "_" + p.Value
+	}
+
 	// store part
 	err = parts.Store(p)
 	if err != nil {
