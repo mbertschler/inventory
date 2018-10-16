@@ -4,7 +4,7 @@ function sendForm(action, selector) {
 	for (var i = 0; i < elements.length; i++) {
 		data[elements[i].name] = elements[i].value
 	}
-
+	guiapi(action, data)
 }
 
 function sendInput(action, event) {
