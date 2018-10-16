@@ -7,7 +7,7 @@ import (
 // Router handles all the GUI routes
 func Router() *http.ServeMux {
 	router := http.NewServeMux()
-	router.HandleFunc("/", rootPage)
+	router.HandleFunc("/", listPage)
 	router.HandleFunc("/part/", partPage)
 	return router
 }

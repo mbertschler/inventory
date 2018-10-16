@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/etcd-io/bbolt"
@@ -66,6 +67,35 @@ func initDB() error {
 
 // All returns all Parts from the database.
 func All() ([]*Part, error) {
+	return filterAllParts(nil)
+}
+
+// Search returns all Parts with string fields that match query.
+func Search(query string) ([]*Part, error) {
+	query = strings.ToLower(query)
+	filter := func(p *Part) bool {
+		s := []string{
+			p.Code,
+			p.Name,
+			p.Serial,
+			p.Type,
+			p.Value,
+			p.Size,
+			p.Location,
+			p.Supplier,
+		}
+		for _, e := range s {
+			e = strings.ToLower(e)
+			if strings.Contains(e, query) {
+				return true
+			}
+		}
+		return false
+	}
+	return filterAllParts(filter)
+}
+
+func filterAllParts(filter func(*Part) bool) ([]*Part, error) {
 	var all []*Part
 	err := db.View(func(tx *bolt.Tx) error {
 		return tx.Bucket(partsBucket).ForEach(func(k, v []byte) error {
@@ -73,7 +103,9 @@ func All() ([]*Part, error) {
 			if err != nil {
 				return err
 			}
-			all = append(all, p)
+			if filter == nil || filter(p) {
+				all = append(all, p)
+			}
 			return nil
 		})
 	})

@@ -2,20 +2,10 @@ package gui
 
 import (
 	"fmt"
-	"log"
-	"net/http"
 	"time"
 
 	"github.com/mbertschler/blocks/html"
 )
-
-func rootPage(w http.ResponseWriter, r *http.Request) {
-	page := mainLayout(listBlock())
-	err := html.Render(page, w)
-	if err != nil {
-		log.Println(err)
-	}
-}
 
 func mainLayout(content html.Block) html.Block {
 	return html.Blocks{

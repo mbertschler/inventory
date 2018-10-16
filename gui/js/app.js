@@ -4,7 +4,11 @@ function sendForm(action, selector) {
 	for (var i = 0; i < elements.length; i++) {
 		data[elements[i].name] = elements[i].value
 	}
-	guiapi(action, data)
+
+}
+
+function sendInput(action, event) {
+	guiapi(action, event.target.value)
 }
 
 // ================= GUI API =================
@@ -30,12 +34,7 @@ function guiapi(name, args) {
 }
 
 var callableFunctions = {
-	"setURL": setURL,
 	"redirect": redirect,
-}
-
-function setURL(args) {
-	history.pushState(args[0], args[1], args[2])
 }
 
 function redirect(path) {
@@ -46,7 +45,7 @@ function handleResponse(resp) {
 	for (var i =0; i < resp.Results.length; i++) {
 		var r = resp.Results[i]
 		if (r.Error){
-			console.error(r.Error)
+			console.error("[" + r.Error.Code + "]", r.Error.Message, r.Error)
 			window.alert("guiapi error, check console")
 			continue
 		}
