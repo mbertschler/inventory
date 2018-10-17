@@ -45,7 +45,9 @@ func searchListAction(args json.RawMessage) (*guiapi.Result, error) {
 func listBlock(parts []*parts.Part) html.Block {
 	return html.Blocks{
 		listControls,
-		listOnlyBlock(parts),
+		html.Div(html.Id("partsList").Class("ui list"),
+			listOnlyBlock(parts),
+		),
 	}
 }
 
@@ -63,21 +65,19 @@ func listOnlyBlock(parts []*parts.Part) html.Block {
 			html.Elem("td", nil, html.Text(p.Location)),
 		))
 	}
-	return html.Div(html.Id("partsList").Class("ui list"),
-		html.Elem("table", html.Class("ui celled compact table"),
-			html.Elem("thead", nil,
-				html.Elem("tr", nil,
-					html.Elem("th", nil, html.Text("Code")),
-					html.Elem("th", nil, html.Text("Name")),
-					html.Elem("th", nil, html.Text("Type")),
-					html.Elem("th", nil, html.Text("Value")),
-					html.Elem("th", nil, html.Text("Size")),
-					html.Elem("th", nil, html.Text("Quantity")),
-					html.Elem("th", nil, html.Text("Location")),
-				),
-			), html.Elem("tbody", nil,
-				list,
+	return html.Elem("table", html.Class("ui celled compact table"),
+		html.Elem("thead", nil,
+			html.Elem("tr", nil,
+				html.Elem("th", nil, html.Text("Code")),
+				html.Elem("th", nil, html.Text("Name")),
+				html.Elem("th", nil, html.Text("Type")),
+				html.Elem("th", nil, html.Text("Value")),
+				html.Elem("th", nil, html.Text("Size")),
+				html.Elem("th", nil, html.Text("Quantity")),
+				html.Elem("th", nil, html.Text("Location")),
 			),
+		), html.Elem("tbody", nil,
+			list,
 		),
 	)
 }
