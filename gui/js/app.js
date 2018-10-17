@@ -1,3 +1,33 @@
+var scanner
+function startCodeScanner() {
+	scanner = new Instascan.Scanner({
+		video: document.getElementById("scanVideo"),
+	})
+	scanner.addListener("scan", function (content) {
+		guiapi("scanCode", content)
+	})
+	Instascan.Camera.getCameras().then(function (cameras) {
+		if (cameras.length > 0) {
+			scanner.start(cameras[0])
+		} else {
+			window.alert("No cameras found.")
+			console.error("No cameras found.")
+		}
+	}).catch(function (e) {
+		window.alert("Can't get cameras. Check console")
+		console.error(e)
+	})
+}
+
+function stopCodeScanner() {
+	scanner.stop().then(function () {
+		console.log("scanner stopped")
+	}).catch(function (e) {
+		window.alert("Can't stop scanner. Check console")
+		console.error(e)
+	})
+}
+
 function sendForm(action, selector) {
 	var elements = $(selector)
 	var data = {}
@@ -35,6 +65,8 @@ function guiapi(name, args) {
 
 var callableFunctions = {
 	"redirect": redirect,
+	"startScan": startCodeScanner,
+	"stopScan": stopCodeScanner,
 }
 
 function redirect(path) {

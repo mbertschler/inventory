@@ -41,6 +41,8 @@ func layoutBody(content html.Block) html.Block {
 		),
 		html.Script(html.Src("https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js")),
 		html.Script(html.Src("https://cdn.jsdelivr.net/npm/semantic-ui@2.4.0/dist/semantic.min.js")),
+		html.Script(html.Src("https://cdn.jsdelivr.net/gh/schmich/instascan-builds@"+
+			"36ad50f009718fafa78ac09aa275fe6430106360/instascan.min.js")),
 		html.Script(html.Src(addRefreshQuery("/js/app.js"))),
 	)
 }

@@ -15,6 +15,10 @@ import (
 func init() {
 	// setup guiapi action
 	guiapi.DefaultHandler.Functions["searchList"] = searchListAction
+	guiapi.DefaultHandler.Functions["startScan"] = startScanAction
+	guiapi.DefaultHandler.Functions["stopScan"] = stopScanAction
+	guiapi.DefaultHandler.Functions["scanCode"] = scanCodeAction
+	guiapi.DefaultHandler.Functions["clearScan"] = clearScanAction
 }
 
 func listPage(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +26,7 @@ func listPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	page := mainLayout(listBlock(parts))
+	page := mainLayout(listBlock(parts, false))
 	err = html.Render(page, w)
 	if err != nil {
 		log.Println(err)
@@ -42,9 +46,60 @@ func searchListAction(args json.RawMessage) (*guiapi.Result, error) {
 	return guiapi.Replace("#partsList", listOnlyBlock(parts))
 }
 
-func listBlock(parts []*parts.Part) html.Block {
+func startScanAction(args json.RawMessage) (*guiapi.Result, error) {
+	res, err := guiapi.Replace("#listControls", listControls(true))
+	if err != nil {
+		return res, err
+	}
+	res.JS = append(res.JS, guiapi.JSCall{Name: "startScan"})
+	return res, nil
+}
+
+func stopScanAction(args json.RawMessage) (*guiapi.Result, error) {
+	res, err := guiapi.Replace("#listControls", listControls(false))
+	if err != nil {
+		return res, err
+	}
+	res.JS = append(res.JS, guiapi.JSCall{Name: "stopScan"})
+	return res, nil
+}
+
+func scanCodeAction(args json.RawMessage) (*guiapi.Result, error) {
+	var in string
+	err := json.Unmarshal(args, &in)
+	if err != nil {
+		return nil, err
+	}
+	parts, err := parts.Search(in)
+	if err != nil {
+		log.Println(err)
+	}
+	blocks := html.Blocks{
+		html.Div(html.Class("ui teal message grid").Attr("onclick", "guiapi('clearScan', null)"),
+			html.I(html.Class("close icon")),
+			html.Strong(nil, html.Text("Scanned Code:")),
+			html.Text(in),
+			html.Br(),
+			html.Text("click to clear"),
+		),
+		listOnlyBlock(parts),
+	}
+	return guiapi.Replace("#partsList", blocks)
+}
+
+func clearScanAction(args json.RawMessage) (*guiapi.Result, error) {
+	parts, err := parts.All()
+	if err != nil {
+		log.Println(err)
+	}
+	return guiapi.Replace("#partsList", listOnlyBlock(parts))
+}
+
+func listBlock(parts []*parts.Part, scanning bool) html.Block {
 	return html.Blocks{
-		listControls,
+		html.Div(html.Class("ui grid").Id("listControls"),
+			listControls(scanning),
+		),
 		html.Div(html.Id("partsList").Class("ui list"),
 			listOnlyBlock(parts),
 		),
@@ -82,14 +137,27 @@ func listOnlyBlock(parts []*parts.Part) html.Block {
 	)
 }
 
-var listControls = html.Div(html.Class("ui grid"),
-	html.Div(html.Class("thirteen wide column"),
-		html.Div(html.Class("ui fluid icon input").Attr("oninput", "sendInput('searchList', event)"),
-			html.Input(html.Type("text").Attr("placeholder", "Search parts...")),
-			html.I(html.Class("search icon")),
+func listControls(scanning bool) html.Block {
+	var scanButton, video html.Block
+	if scanning {
+		scanButton = html.Div(html.Class("ui button orange").Attr("onclick", "guiapi('stopScan', null)"),
+			html.Text("Stop Scanner"))
+		video = html.Elem("video", html.Id("scanVideo").Styles("height:240px;margin-bottom:14px"))
+	} else {
+		scanButton = html.Div(html.Class("ui button yellow").Attr("onclick", "guiapi('startScan', null)"),
+			html.Text("Start Scanner"))
+	}
+	return html.Blocks{
+		html.Div(html.Class("ten wide column"),
+			html.Div(html.Class("ui fluid icon input").Attr("oninput", "sendInput('searchList', event)"),
+				html.Input(html.Type("text").Attr("placeholder", "Search parts...")),
+				html.I(html.Class("search icon")),
+			),
 		),
-	),
-	html.Div(html.Class("three wide column right floated"),
-		html.Div(html.Class("ui button primary").Attr("onclick", "guiapi('newPart', null)"), html.Text("Add Part")),
-	),
-)
+		html.Div(html.Class("six wide column right floated"),
+			html.Div(html.Class("ui button primary").Attr("onclick", "guiapi('newPart', null)"), html.Text("Add Part")),
+			scanButton,
+		),
+		video,
+	}
+}
