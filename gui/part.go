@@ -221,6 +221,9 @@ func viewPartAction(args json.RawMessage) (*guiapi.Result, error) {
 	if err != nil {
 		return nil, err
 	}
+	if part == nil {
+		return guiapi.Redirect("/")
+	}
 	return guiapi.Replace("#container", viewPartBlock(part))
 }
 

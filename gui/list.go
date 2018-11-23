@@ -74,6 +74,12 @@ func scanCodeAction(args json.RawMessage) (*guiapi.Result, error) {
 	if err != nil {
 		log.Println(err)
 	}
+	if len(parts) == 0 {
+		return guiapi.Replace("#container", editPartBlock(nil))
+	}
+	if len(parts) == 1 {
+		return guiapi.Replace("#container", viewPartBlock(parts[0]))
+	}
 	blocks := html.Blocks{
 		html.Div(html.Class("ui teal message grid").Attr("onclick", "guiapi('clearScan', null)"),
 			html.I(html.Class("close icon")),

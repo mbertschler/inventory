@@ -200,6 +200,9 @@ func ByID(id string) (*Part, error) {
 	if err != nil {
 		return nil, err
 	}
+	if v == nil {
+		return nil, nil
+	}
 	p, err := unpackPart(k, v)
 	return p, err
 }
