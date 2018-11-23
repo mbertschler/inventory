@@ -6,6 +6,7 @@ function startCodeScanner() {
 	})
 	scanner.addListener("scan", function (content) {
 		guiapi("scanCode", content)
+		stopCodeScanner()
 	})
 	Instascan.Camera.getCameras().then(function (cameras) {
 		if (cameras.length > 0) {
