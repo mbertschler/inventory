@@ -37,7 +37,7 @@ func partPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func newPartAction(_ json.RawMessage) (*guiapi.Result, error) {
-	return guiapi.Replace("#container", editPartBlock(nil))
+	return guiapi.Replace("#container", editPartBlock(nil, ""))
 }
 
 func editPartAction(args json.RawMessage) (*guiapi.Result, error) {
@@ -50,14 +50,17 @@ func editPartAction(args json.RawMessage) (*guiapi.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	return guiapi.Replace("#container", editPartBlock(part))
+	return guiapi.Replace("#container", editPartBlock(part, ""))
 }
 
-func editPartBlock(p *parts.Part) html.Block {
+func editPartBlock(p *parts.Part, code string) html.Block {
 	isNew := false
 	if p == nil {
 		isNew = true
 		p = &parts.Part{}
+	}
+	if code != "" {
+		p.Code = code
 	}
 	cancelAction := fmt.Sprintf("guiapi('viewPart', '%s')", p.ID())
 	saveAction := "sendForm('savePart', '.ga-edit-part')"

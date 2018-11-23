@@ -2,6 +2,7 @@ var scanner
 function startCodeScanner() {
 	scanner = new Instascan.Scanner({
 		video: document.getElementById("scanVideo"),
+		mirror: false,
 	})
 	scanner.addListener("scan", function (content) {
 		guiapi("scanCode", content)

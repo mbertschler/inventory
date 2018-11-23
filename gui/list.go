@@ -65,17 +65,17 @@ func stopScanAction(args json.RawMessage) (*guiapi.Result, error) {
 }
 
 func scanCodeAction(args json.RawMessage) (*guiapi.Result, error) {
-	var in string
-	err := json.Unmarshal(args, &in)
+	var code string
+	err := json.Unmarshal(args, &code)
 	if err != nil {
 		return nil, err
 	}
-	parts, err := parts.Search(in)
+	parts, err := parts.Search(code)
 	if err != nil {
 		log.Println(err)
 	}
 	if len(parts) == 0 {
-		return guiapi.Replace("#container", editPartBlock(nil))
+		return guiapi.Replace("#container", editPartBlock(nil, code))
 	}
 	if len(parts) == 1 {
 		return guiapi.Replace("#container", viewPartBlock(parts[0]))
@@ -84,7 +84,7 @@ func scanCodeAction(args json.RawMessage) (*guiapi.Result, error) {
 		html.Div(html.Class("ui teal message grid").Attr("onclick", "guiapi('clearScan', null)"),
 			html.I(html.Class("close icon")),
 			html.Strong(nil, html.Text("Scanned Code:")),
-			html.Text(in),
+			html.Text(code),
 			html.Br(),
 			html.Text("click to clear"),
 		),
@@ -156,7 +156,7 @@ func listControls(scanning bool) html.Block {
 	return html.Blocks{
 		html.Div(html.Class("ten wide column"),
 			html.Div(html.Class("ui fluid icon input").Attr("oninput", "sendInput('searchList', event)"),
-				html.Input(html.Type("text").Attr("placeholder", "Search parts...")),
+				html.Input(html.Type("text").Id("autofocus").Attr("placeholder", "Search parts...")),
 				html.I(html.Class("search icon")),
 			),
 		),
