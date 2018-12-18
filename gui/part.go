@@ -21,6 +21,7 @@ func init() {
 	guiapi.DefaultHandler.Functions["editPart"] = editPartAction
 	guiapi.DefaultHandler.Functions["savePart"] = savePartAction
 	guiapi.DefaultHandler.Functions["deletePart"] = deletePartAction
+	guiapi.DefaultHandler.Functions["checkout"] = checkoutAction
 }
 
 func partPage(w http.ResponseWriter, r *http.Request) {
@@ -230,6 +231,37 @@ func viewPartAction(args json.RawMessage) (*guiapi.Result, error) {
 	return guiapi.Replace("#container", viewPartBlock(part))
 }
 
+func checkoutAction(args json.RawMessage) (*guiapi.Result, error) {
+	var data struct {
+		ID       string
+		Quantity string
+	}
+	err := json.Unmarshal(args, &data)
+	if err != nil {
+		return nil, err
+	}
+	quant, err := strconv.Atoi(data.Quantity)
+	if err != nil {
+		return nil, err
+	}
+	part, err := parts.ByID(data.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	part.Quantity -= quant
+
+	err = parts.Store(part)
+	if err != nil {
+		return nil, err
+	}
+
+	if part == nil {
+		return guiapi.Redirect("/")
+	}
+	return guiapi.Replace("#container", viewPartBlock(part))
+}
+
 func viewPartBlock(p *parts.Part) html.Block {
 	editAction := fmt.Sprintf("guiapi('editPart', '%s')", p.ID())
 	deleteAction := fmt.Sprintf("guiapi('deletePart', '%s')", p.ID())
@@ -270,6 +302,21 @@ func viewPartBlock(p *parts.Part) html.Block {
 			),
 		),
 		html.H1(nil, html.Text(p.Name)),
+		html.Div(html.Class("ui form"),
+			html.Input(html.Type("hidden").Name("ID").Value(p.ID()).Class("ga-checkout")),
+			html.Div(html.Class("field"),
+				html.Label(nil, html.Text("Inventory")),
+				html.Input(html.Type("Text").Value(p.Quantity).Attr("disabled", true)),
+			),
+			html.Div(html.Class("field"),
+				html.Label(nil, html.Text("Checkout")),
+				html.Input(html.Type("Text").Name("Quantity").Value("0").Class("ga-checkout")),
+			),
+			html.Button(html.Class("ui yellow button").
+				Attr("onclick", "sendForm('checkout', '.ga-checkout')"),
+				html.Text("Checkout Parts"),
+			),
+		),
 		html.Elem("table", html.Class("ui celled table"),
 			html.Elem("tbody", nil,
 				rows,
