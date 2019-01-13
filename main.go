@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"git.exahome.net/tools/inventory/gui"
-	"git.exahome.net/tools/inventory/lib/guiapi"
-	"git.exahome.net/tools/inventory/parts"
+	"github.com/mbertschler/inventory/gui"
+	"github.com/mbertschler/inventory/lib/guiapi"
+	"github.com/mbertschler/inventory/parts"
 )
 
 var root string
