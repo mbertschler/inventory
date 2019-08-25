@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/etcd-io/bbolt"
+	bolt "github.com/etcd-io/bbolt"
 )
 
 var (
