@@ -1,10 +1,11 @@
 package main
 
 import (
+	"embed"
 	"flag"
+	"io/fs"
 	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 
 	"github.com/mbertschler/inventory/gui"
@@ -12,24 +13,8 @@ import (
 	"github.com/mbertschler/inventory/parts"
 )
 
-var root string
-
-func init() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	gopath := os.Getenv("GOPATH")
-	paths := filepath.SplitList(gopath)
-	for _, p := range paths {
-		project := filepath.Join(p, "src", "git.exahome.net", "tools", "inventory")
-		info, err := os.Stat(project)
-		if err == nil && info.IsDir() {
-			root = project
-			break
-		}
-	}
-	if root == "" {
-		log.Fatal("couldn't find the project in GOPATH")
-	}
-}
+//go:embed gui/js
+var guiFS embed.FS
 
 func fileServer(url string, path ...string) http.Handler {
 	dir := http.Dir(filepath.Join(path...))
@@ -47,8 +32,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	static, _ := fs.Sub(guiFS, "gui/js")
+
 	log.Println("inventory server at :5080")
-	http.Handle("/js/", fileServer("/js/", root, "gui", "js"))
+	http.Handle("/js/", http.StripPrefix("/js", http.FileServer(http.FS(static))))
 	http.Handle("/guiapi/", guiapi.DefaultHandler)
 	http.Handle("/", gui.Router())
 	log.Println(http.ListenAndServe(":5080", nil))

@@ -27,7 +27,7 @@ func listPage(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	page := mainLayout(listBlock(parts, false))
-	err = html.Render(page, w)
+	err = html.Render(w, page)
 	if err != nil {
 		log.Println(err)
 	}

@@ -31,7 +31,7 @@ func partPage(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	page := mainLayout(viewPartBlock(part))
-	err = html.Render(page, w)
+	err = html.Render(w, page)
 	if err != nil {
 		log.Println(err)
 	}
